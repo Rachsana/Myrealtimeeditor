@@ -69,6 +69,9 @@ io.on("connection", (socket) => {
       console.error("Save error:", err.message);
     }
   });
+  socket.on("cursor-move", ({ docId, userId, username, pos }) => {
+  socket.to(docId).emit("cursor-update", { userId, username, pos, color: getColorFor(userId) });
+});
 
   // Cursor position broadcast
   socket.on("cursor-move", ({ docId, userId, name, color, position }) => {
