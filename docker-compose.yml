@@ -1,0 +1,36 @@
+# Local dev/demo stack: backend + Redis.
+# MongoDB is NOT included here — use a MongoDB Atlas free-tier cluster
+# (or your own local Mongo) and set MONGO_URI in server/.env accordingly.
+#
+# Usage:
+#   cp server/.env.example server/.env   # fill in MONGO_URI + JWT_SECRET
+#   docker compose up --build
+#
+# Backend will be reachable at http://localhost:5000
+# Redis will be reachable at redis://localhost:6379 — set that as REDIS_URL
+# in server/.env if you want to exercise the Socket.IO Redis adapter locally.
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
