@@ -23,6 +23,7 @@ export default function Editor() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteMsg, setInviteMsg] = useState("");
   const [connected, setConnected] = useState(false);
+  const [remoteCursors, setRemoteCursors] = useState({});
 
   const socketRef = useRef(null);
   const saveTimerRef = useRef(null);
@@ -62,11 +63,41 @@ export default function Editor() {
       setPresence(users.filter((u) => u.userId !== userId));
     });
 
+    socket.on("cursor-update", ({ userId, username, pos, color }) => {
+    setRemoteCursors((prev) => ({
+        ...prev,
+        [userId]: { pos, username, color }
+    }));
+});
+
     socket.on("doc-saved", () => setSaveStatus("saved"));
 
     return () => socket.disconnect();
   }, [id]); // only re-run if doc id changes
+useEffect(() => {
+    const textarea = textareaRef.current;
 
+    if (!textarea || !socketRef.current) return;
+
+    const sendCursor = () => {
+        socketRef.current.emit("cursor-move", {
+            docId: id,
+            userId,
+            username: userName,
+            pos: textarea.selectionStart
+        });
+    };
+
+    textarea.addEventListener("click", sendCursor);
+    textarea.addEventListener("keyup", sendCursor);
+    textarea.addEventListener("select", sendCursor);
+
+    return () => {
+        textarea.removeEventListener("click", sendCursor);
+        textarea.removeEventListener("keyup", sendCursor);
+        textarea.removeEventListener("select", sendCursor);
+    };
+}, [id]);
   // Auto-save on content change
   useEffect(() => {
     if (!socketRef.current || !socketRef.current.connected) return;
@@ -165,6 +196,27 @@ export default function Editor() {
           placeholder={"Start typing your document here…\n\nThis editor syncs in real-time with everyone who has access."}
           spellCheck
         />
+        <div
+    style={{
+        width: "100%",
+        maxWidth: 680,
+        margin: "10px auto",
+        fontSize: "13px",
+    }}
+>
+    {Object.values(remoteCursors).map((cursor) => (
+        <div
+            key={cursor.username}
+            style={{
+                color: cursor.color,
+                marginBottom: "4px",
+                fontWeight: 500,
+            }}
+        >
+            🖊 {cursor.username} is editing (Cursor: {cursor.pos})
+        </div>
+    ))}
+</div>
       </div>
 
       {/* Status bar */}
