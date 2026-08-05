@@ -90,19 +90,30 @@ CollabDoc/
 └── CHANGES.md
 ```
 
----
 
-# 📸 Screenshots
+## 📸 Screenshots
 
-| Login | Dashboard |
-|-------|-----------|
-| ![](screenshots/login.png) | ![](screenshots/home.png) |
+### Sign Up
 
-| Editor | Invite Collaborator |
-|--------|---------------------|
-| ![](screenshots/editor.png) | ![](screenshots/invite.png) |
+![Sign Up](screenshots/signup.png)
 
 ---
+
+### Sign In
+
+![Sign In](screenshots/signin.png)
+
+---
+
+### Main Dashboard
+
+![Dashboard](screenshots/main.png)
+
+---
+
+### Invite Collaborator
+
+![Invite](screenshots/invite.png)
 
 # ⚙️ Local Setup
 
